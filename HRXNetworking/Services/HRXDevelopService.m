@@ -7,7 +7,7 @@
 //
 
 #import "HRXDevelopService.h"
-#import "PALastLoginManager.h"
+#import "PALoginModel.h"
 
 @implementation HRXDevelopService
 
@@ -18,14 +18,28 @@
 
 - (NSDictionary *)commonParams {
     
+    NSMutableDictionary *commonParams = [NSMutableDictionary new];
+    PALoginModel *loginModel = [HRXAppManager shareMager].loginModel;
+    
+    if (loginModel.accessToken) {
+        
+        [commonParams setValue:loginModel.accessToken forKey:@"accessToken"];
+        return commonParams;
+    }
+    
     return nil;
 }
 
 - (NSDictionary *)commonHttpHeads {
     
     NSMutableDictionary *commonHttpHeads = [NSMutableDictionary dictionaryWithObjectsAndKeys:@"Content-Type", @"application/json", @"Accept", @"application/json", nil];
-    
-    NSString *papa5Wesession = [PALastLoginManager readLastUserBean].papa5Wesession;
+    NSString *accessToken = [HRXAppManager shareMager].loginModel.accessToken;
+
+
+    if (accessToken) {
+        
+        [commonHttpHeads setValue:accessToken forKey:@"X-HRX-SESSION"];
+    }
     
     return commonHttpHeads;
 }
