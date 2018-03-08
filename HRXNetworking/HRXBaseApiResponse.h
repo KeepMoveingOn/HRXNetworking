@@ -33,5 +33,9 @@
  @param responseObject 返回数据
  */
 - (void)analyse:(id)responseObject task:(NSURLSessionDataTask *)task;
+/**
+ 清除上次请求结果
+ */
+- (void)cleanData;
 
 @end

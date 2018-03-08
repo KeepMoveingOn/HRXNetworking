@@ -29,4 +29,12 @@ static NSInteger const requestSuccessCode = 10001;
     }
 }
 
+- (void)cleanData {
+    
+    _code = nil;
+    _message = nil;
+    _responseObject = nil;
+    _isSuccess = NO;
+}
+
 @end

@@ -17,9 +17,10 @@
     if (self = [super init]) {
         
         _apiRequestType = HRXApiRequestTypePost;
-        _timeoutInterval = 15.0;
+        _timeoutInterval = 12.0;
         _apiRequestDataType = HRXApiRequestDataTypeJson;
         _apiResponseDataType = HRXApiResponseDataTypeJson;
+        _apiResponse = [HRXBaseApiResponse new];
     }
     return self;
 }
@@ -27,6 +28,7 @@
 #pragma mark - Public
 - (void)analyse:(id)responseObject task:(NSURLSessionDataTask *)task {
     
+    [self.apiResponse cleanData];
     [self.apiResponse analyse:responseObject task:task];
     
     if (self.apiResponse.isSuccess) {
@@ -87,15 +89,6 @@
     }
     
     return nil;
-}
-
-- (HRXBaseApiResponse *)apiResponse {
-    
-    if (!_apiResponse) {
-        
-        _apiResponse = [HRXBaseApiResponse new];
-    }
-    return _apiResponse;
 }
 
 #pragma mark - Test Code

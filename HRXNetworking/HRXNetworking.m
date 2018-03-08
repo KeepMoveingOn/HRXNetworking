@@ -75,22 +75,23 @@
 
 #pragma mark - Private
 - (void)POST:(HRXBaseApiRequest *)apiRequest success:(HRXRequestSuccessBlock)success failure:(HRXRequestFailureBlock)failure {
- 
-    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+    
+//    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
     AFHTTPSessionManager *manager = [self manager:apiRequest];
     
-    [manager POST:apiRequest.requestUrl parameters:apiRequest.params progress:^(NSProgress * _Nonnull uploadProgress) {
+    id<HRXServiceProtocol> service = [[HRXServiceFactory sharedFactory] service];
+    NSMutableDictionary *parameters = [NSMutableDictionary dictionaryWithDictionary:apiRequest.params];
+    [parameters addEntriesFromDictionary:[service commonParams]];
+    [manager POST:apiRequest.requestUrl parameters:parameters progress:^(NSProgress * _Nonnull uploadProgress) {
         
         
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         
         [apiRequest analyse:responseObject task:task];
-        if ([self checkAccessToken:apiRequest success:success failure:failure]) {
+        
+        if (success) {
             
-            if (success) {
-                
-                success(apiRequest.apiResponse);
-            }
+            success(apiRequest.apiResponse);
         }
         [HRNetworkingLog logRequestInfoWithRequest:apiRequest error:nil];
         [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
@@ -109,22 +110,23 @@
 
 - (void)GET:(HRXBaseApiRequest *)apiRequest success:(HRXRequestSuccessBlock)success failure:(HRXRequestFailureBlock)failure {
     
-    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+//    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
     AFHTTPSessionManager *manager = [self manager:apiRequest];
     
-    [manager GET:apiRequest.requestUrl parameters:apiRequest.params progress:^(NSProgress * _Nonnull uploadProgress) {
+    id<HRXServiceProtocol> service = [[HRXServiceFactory sharedFactory] service];
+    NSMutableDictionary *parameters = [NSMutableDictionary dictionaryWithDictionary:apiRequest.params];
+    [parameters addEntriesFromDictionary:[service commonParams]];
+    [manager GET:apiRequest.requestUrl parameters:parameters progress:^(NSProgress * _Nonnull uploadProgress) {
         
         
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         
         [apiRequest analyse:responseObject task:task];
         
-        if ([self checkAccessToken:apiRequest success:success failure:failure]) {
+        
+        if (success) {
             
-            if (success) {
-                
-                success(apiRequest.apiResponse);
-            }
+            success(apiRequest.apiResponse);
         }
         
         [HRNetworkingLog logRequestInfoWithRequest:apiRequest error:nil];
@@ -171,7 +173,7 @@
         case HRXApiRequestDataTypeBinary:
             return [AFHTTPRequestSerializer serializer];
             break;
-        
+            
         case HRXApiRequestDataTypeJson:
             return [AFJSONRequestSerializer serializer];
             break;
@@ -206,13 +208,22 @@
 }
 
 #pragma mark - Getter
-- (dispatch_queue_t)serialQueue {
+- (dispatch_queue_t)concurrentQueue {
     
-    if (!_serialQueue) {
+    if (!_concurrentQueue) {
         
-        _serialQueue = dispatch_queue_create("serialQueue", DISPATCH_QUEUE_SERIAL);
+        _concurrentQueue = dispatch_queue_create("concurrentQueue", DISPATCH_QUEUE_CONCURRENT);
     }
-    return _serialQueue;
+    return _concurrentQueue;
+}
+
+- (dispatch_semaphore_t)refreshTokenSemaphore {
+    
+    if (!_refreshTokenSemaphore) {
+        
+        _refreshTokenSemaphore = dispatch_semaphore_create(1);
+    }
+    return _refreshTokenSemaphore;
 }
 
 @end

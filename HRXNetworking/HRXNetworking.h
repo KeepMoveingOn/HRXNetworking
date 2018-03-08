@@ -18,7 +18,8 @@ typedef void(^HRXDownloadSuccessBlock)(NSString *filePath);
 
 @interface HRXNetworking : NSObject
 
-@property (nonatomic, strong) dispatch_queue_t serialQueue;
+@property (nonatomic, strong) dispatch_queue_t concurrentQueue;
+@property (nonatomic, strong) dispatch_semaphore_t refreshTokenSemaphore;
 @property (nonatomic, assign) BOOL refreshedToken;
 @property (nonatomic, assign) NSInteger refreshApiCount;
 
